@@ -1,0 +1,77 @@
+﻿
+@{
+    ViewBag.Title = "登入";
+}
+
+    <br>
+    <div style="margin-left:10px;" action="Login/Home" method="post">
+        <div class="form-group">
+            <label for="indexaccount">帳號</label>
+            <input type="text" class="form-control" id="indexaccount" name="indexaccount" placeholder="輸入帳號">
+        </div>
+        <div class="form-group">
+            <label for="indexpassword">密碼</label>
+            <input type="text" class="form-control" id="indexpassword" name="indexpassword" placeholder="輸入密碼">
+        </div>
+        <input type="checkbox" id="remberAccount" name="remberAccount">記住帳號 <br>
+        <button type="button" class="btn btn-primary" onclick="login()">登入 </button>
+        <button type="button" class="btn btn-primary" id="CreateUser" onclick="signup()">註冊 </button>
+    </div>
+
+
+    <script>
+        $(document).ready(function () {
+            if ("@ViewBag.checkRemember" == "on") {
+            $('#indexaccount').val('@ViewBag.account');
+            $('#remberAccount').prop('checked', true);
+        }
+        });
+
+        function signup() {
+            window.location.href = '/Login/SignUp';
+        }
+
+        function login() {
+            var account = $('#indexaccount').val();
+            var password = $('#indexpassword').val();
+            var postAccount = { account: account};
+
+            //儲存帳號
+            if ($('#remberAccount').is(":checked")) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/Login/RememberAccount',
+                    dataType: 'json',
+                    contentType: "application/json",
+                    data: JSON.stringify(postAccount)
+                });
+            }
+
+            var account = $('#indexaccount').val();
+            var password = $('#indexpassword').val();
+            var postData = {
+                account: account,
+                password: password
+            };
+
+            //登入驗證
+            $.ajax({
+                url: '/Login/Login',
+                type: 'POST',
+                dataType: 'json',
+                contentType: "application/json",
+                data: JSON.stringify(postData),
+                success: function (response) {
+                    if (response.IsSuccess) {
+                        window.location.href = '/Home/Index';
+                    } else {
+                        alert(response.Message);
+                        window.location.href = '/Login/Index';
+                    }
+                }
+            });
+        }
+
+
+    </script>
+

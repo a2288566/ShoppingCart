@@ -1,0 +1,206 @@
+﻿
+@{
+    ViewBag.Title = "ProductDetail";
+    if (Session["userName"] == null)
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+    }
+
+    if (Model.Classification == "equipments")
+    {
+        Model.Classification = "裝備";
+    }
+    if (Model.Classification == "weapons")
+    {
+        Model.Classification = "武器";
+    }
+    if (Model.Classification == "others")
+    {
+        Model.Classification = "其他";
+    }
+}
+
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+
+</head>
+<body>
+    <br>
+    <div style="margin-left:10px;" action="Login/Home" method="post">
+        <div class="form-group">
+            <label for="productTitle">商品標題:@Model.ProductTitle</label><br>
+        </div>
+        <div class="form-group">
+            <label for="productClassification">分類:@Model.Classification</label>
+        </div>
+        <div class="form-group">
+            <label for="quantity">數量：</label>
+            <input type="number" id="quantity" value="1" min="1" style="max-width:50px">
+        </div>
+        <div class="form-group">
+            <label for="productTitle">販售金額:<span id="saleAmount">@Model.Price</span></label>
+        </div><br>
+        <button type="button" class="btn btn-primary" onclick="addShoppingCart()">加入購物車 </button>
+        <button type="button" class="btn btn-primary" onclick="back()">返回 </button>
+    </div>
+    <br>
+    <div class="container">
+        <form class="add-comment-form mt-4 mb-4">
+            <div class="form-group">
+                <label for="content-textarea">輸入留言</label>
+                <textarea name="content" class="form-control" aria-label="With textarea" id="message"></textarea>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="submitMessage()">送出</button>
+        </form><br>
+        <div id="messageBoard">
+            <p>留言區</p>
+        </div>
+    </div>
+
+
+    <script>
+        $(document).ready(function () {
+            $("#quantity").on("input", function () {
+                var quantity = parseInt($("#quantity").val());
+                var basePrice = @Model.Price;
+                var totalPrice = basePrice * quantity;
+                $("#saleAmount").text(totalPrice);
+            });
+
+            getMessage();
+        });
+
+        function getMessage() {
+            $.ajax({
+                url: '/Home/GetMessage',
+                type: 'POST',
+                dataType: 'json',
+                contentType: "application/json",
+                data: JSON.stringify({ productID: @Model.Id }),
+                success: function (response) {
+                    if (response.IsSuccess) {
+                        var messageBoard = document.getElementById("messageBoard");
+                        response.messageList.forEach(function (comment) {
+                            var messageDiv = document.createElement("div");
+                            messageDiv.className = "message";
+
+                            var userInfo = document.createElement("p");
+                            userInfo.textContent = "ID:" + comment.UserID ;
+                            messageDiv.appendChild(userInfo);
+
+                            var messageText = document.createElement("p");
+                            comment.CreateDate = parseDate(comment.CreateDate);
+                            messageText.textContent = comment.Message + "\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0" + comment.CreateDate;
+                            messageDiv.appendChild(messageText);
+
+                            messageBoard.appendChild(messageDiv);
+                        });
+
+
+                    } else {
+                        alert(response.Message);
+                    }
+                }
+            });
+        }
+
+        function back() {
+            window.location.href = '/Home/index';
+        }
+
+
+        function addShoppingCart() {
+
+            @if (Session["memberID"] == null) {
+                @:alert('請先登入')
+                @:window.location.href = '/Login/index';
+                @:return;
+            }
+
+            var productId = '@Model.Id';
+            var quantity = $("#quantity").val();
+            var totalPrice = $("#saleAmount").text();
+            var postData = {
+                ProductID: productId,
+                Quantity: quantity,
+                TotalPrice: totalPrice
+            };
+
+            $.ajax({
+                url: '/Home/AddShoppingCart',
+                type: 'POST',
+                dataType: 'json',
+                contentType: "application/json",
+                data: JSON.stringify(postData),
+                success: function (response) {
+                    if (response.IsSuccess) {
+                        alert('加入成功');
+                    } else {
+                        alert(response.Message);
+                    }
+                }
+            });
+        }
+
+        function submitMessage() {
+
+            var message = $("#message").val();
+            var userID = null;
+            var productId = null;
+            @if (Model.Id != null && Session["memberID"] != null)
+            {
+                @:productId = @Model.Id;
+                @:userID = @Session["memberID"];
+            }
+            else
+            {
+                @:alert('請先登入')
+                @:window.location.href = '/Login/index';
+                @:return;
+            }
+
+            var productMessage = {
+                ProductID: productId,
+                UserID: userID,
+                message: message
+            };
+            $.ajax({
+                url: '/Home/InsertMessage',
+                type: 'POST',
+                dataType: 'json',
+                contentType: "application/json",
+                data: JSON.stringify(productMessage),
+                success: function (response) {
+                    if (response.IsSuccess) {
+                        window.location.reload();
+                    } else {
+                        alert(response.Message);
+                    }
+                }
+            });
+        }
+
+        function parseDate(dateStr) {
+            // 使用正則表達式提取日期時間部分
+            const match = dateStr.match(/\d+/);
+            if (!match) {
+                return null;
+            }
+
+            // 將提取的數字轉換為數字並創建Date對象
+            const timestamp = parseInt(match[0], 10);
+            const date = new Date(timestamp);
+
+            // 返回格式化的日期時間字符串，例如 "YYYY/MM/DD HH:mm:ss"
+            return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html>

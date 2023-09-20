@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - 8591</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse" title="其他選項">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("8591", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="#" id="pushProducts">刊登商品</a></li>
+                    <li><a href="#" id="myPushProducts">我的刊登商品</a></li>
+                    <li><a href="#" id="cart">購物車</a></li>
+                    <li><a href="#">你好 @Session["userName"]</a></li>
+                    <li><a href="#" id="logoutLink">登出</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - 8591</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+</body>
+</html>
+<script>
+    $(document).ready(function () {
+        $("#logoutLink").click(function () {
+            console.log('登出提示');
+            if (confirm('是否要登出？')) {
+                window.location.href = "/Login/Logout";
+            }
+        });
+
+        $("#pushProducts").click(function () {
+            window.location.href = "/Home/PushProducts";
+        });
+
+        $("#myPushProducts").click(function () {
+            window.location.href = "/Home/MyPushProducts";
+        });
+        $("#cart").click(function () {
+            window.location.href = "/Home/Cart";
+        });
+    });
+
+</script>

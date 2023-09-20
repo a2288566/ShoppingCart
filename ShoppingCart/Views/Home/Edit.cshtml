@@ -1,0 +1,115 @@
+﻿
+@{
+    ViewBag.Title = "編輯";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <br>
+    <div style="margin-left:10px;" action="Login/Home" method="post">
+        <div class="form-group">
+            <label for="productTitle">商品標題</label>
+            <input type="text" class="form-control" id="productTitle" name="productTitle" required>
+            <span class="productTitleErrorMessage" style="color: red;"></span>
+        </div>
+        <div class="form-group">
+            <label for="productClassification">分類</label><br>
+            <select id="productClassification" class="form-control">
+                <option value="pleaceSelect">請選擇</option>
+                <option value="equipments">裝備</option>
+                <option value="weapons">武器</option>
+                <option value="others">其他</option>
+            </select>
+            <span class="productClassificationErrorMessage" style="color: red;"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="productTitle">販售金額</label>
+            <input type="text" class="form-control" id="productPrice" name="productPrice" required>
+            <span class="productPriceErrorMessage" style="color: red;"></span>
+        </div><br>
+
+        <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitProduct()">送出 </button>
+        <button type="button" class="btn btn-primary" onclick="cancelSubmit()">取消 </button>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#productTitle').val('@Html.Raw(Model.ProductTitle)');
+            $('#productPrice').val('@Html.Raw(Model.Price)');
+            $('#productClassification').val('@Html.Raw(Model.Classification)');
+        });
+
+        function cancelSubmit() {
+            window.location.href = '/Home/MyPushProducts';
+        }
+
+        function submitProduct() {
+            checkProductInfo();
+            editProductInfo();
+        }
+
+        function checkProductInfo() {
+            var productTitle = $('#productTitle').val();
+            var productClassification = $('#productClassification').val();
+            var productPrice = $('#productPrice').val();
+            var hasError = false;
+
+            $(".productTitleErrorMessage").text("");
+            $(".productClassificationErrorMessage").text("");
+            $('.productPriceErrorMessage').text("");
+
+            if (productTitle === '') {
+                $(".accountErrorMessage").text("請填寫商品標題");
+                hasError = true;
+            }
+            if (productClassification === 'pleaceSelect') {
+                $(".productClassificationErrorMessage").text("請選擇分類");
+                hasError = true;
+            }
+            if (productPrice === '') {
+                $(".productPriceErrorMessage").text("請填寫販售價格");
+                hasError = true;
+            }
+
+            if (hasError) {
+                return false;
+            }
+        }
+
+        function editProductInfo() {
+            var productId = '@Html.Raw(Model.Id)'
+            var productTitle = $('#productTitle').val();
+            var productClassification = $('#productClassification').val();
+            var productPrice = $('#productPrice').val();
+            var postData = {
+                Id: productId,
+                productTitle: productTitle,
+                classification: productClassification,
+                price: productPrice
+            };
+            $.ajax({
+                url: '/Home/EditProduct',
+                type: 'POST',
+                dataType: 'json',
+                contentType: "application/json",
+                data: JSON.stringify(postData),
+                success: function (response) {
+                    if (response.IsSuccess) {
+                        alert('編輯成功');
+                        window.location.href = '/Home/MyPushProducts';
+                    } else {
+                        alert(response.Message);
+                    }
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>

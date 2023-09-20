@@ -1,0 +1,75 @@
+﻿
+@{
+    ViewBag.Title = "Cart";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+
+}
+
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <br>
+    <br>
+    <br>
+
+    <table id="myCartProductDataTable" class="display">
+        <thead>
+            <tr>
+                <th>商品標題</th>
+                <th>單價</th>
+                <th>總數</th>
+                <th>總價</th>
+                <th>編輯</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="clickable-row" data-href="@Url.Action("ProductDetail", "Home", new { productId = item.ProductID })">
+                    <td>@item.ProductTitle</td>
+                    <td>@item.Price</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.TotalPrice</td>
+                    <td>
+                        <a href="#" class="deleteMyCartProduct" data-cartid="@item.CartID">刪除</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <script>
+
+        $(document).ready(function () {
+            $('#myCartProductDataTable').DataTable();
+            $(".clickable-row").click(function () {
+                window.location.href = $(this).data("href");
+            });
+            console.log('@Model');
+        });
+
+        $(".deleteMyCartProduct").click(function () {
+            var cartID = $(this).data("cartid");
+            confirm('使否要刪除此商品')
+            $.ajax({
+                url: '/Home/DeleteMyCartProduct',
+                type: 'POST',
+                dataType: 'json',
+                contentType: "application/json",
+                data: JSON.stringify({ CartID: cartID }),
+                success: function (response) {
+                    if (response.IsSuccess) {
+                        alert('商品刪除成功');
+                        window.location.href = '/Home/Cart';
+                    } else {
+                        alert("刪除失敗");
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

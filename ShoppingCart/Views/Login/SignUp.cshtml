@@ -1,0 +1,153 @@
+﻿
+@{
+    ViewBag.Title = "註冊";
+}
+
+<body>
+    <br>
+    <div style="margin-left:10px;" action="Login/Home" method="post">
+        <div class="form-group">
+            <label for="indexAccount">帳號</label>
+            <input type="text" class="form-control" id="indexAccount" name="indexAccount" placeholder="輸入帳號" required>
+            <span class="accountErrorMessage" style="color: red;"></span>
+        </div>
+        <div class="form-group">
+            <label for="indexPassword">密碼</label>
+            <input type="text" class="form-control" id="indexPassword" name="indexPassword" placeholder="輸入密碼" required>
+            <span class="passwordErrorMessage" style="color: red;"></span>
+        </div>
+        <div class="form-group">
+            <label for="indexName">姓名</label>
+            <input type="text" class="form-control" id="indexName" name="indexName" placeholder="輸入姓名" required>
+            <span class="nameErrorMessage" style="color: red;"></span>
+        </div>
+        <div class="form-group">
+            <label for="indexPhone">手機</label>
+            <input type="text" class="form-control" id="indexPhone" name="indexPhone" placeholder="輸入手機" required>
+            <span class="phoneErrorMessage" style="color: red;"></span>
+        </div>
+        <div class="form-group">
+            <label for="indexEmail">Email</label>
+            <input type="text" class="form-control" id="indexEmail" name="indexEmail" placeholder="輸入Email" required>
+            <span class="emailErrorMessage" style="color: red;"></span>
+        </div>
+        <div class="form-group">
+            <label for="indexBirthday">生日</label>
+            <input type="text" class="form-control" id="indexBirthday" name="indexBirthday" placeholder="輸入生日" required>
+            <span class="birthdayErrorMessage" style="color: red;"></span>
+        </div>
+        <button type="button" class="btn btn-primary" id="submitBtn" onclick="submit()">送出 </button>
+        <button type="button" class="btn btn-primary" onclick="cancel()">取消 </button>
+    </div>
+
+
+    <script>
+        function cancel() {
+            window.location.href = '/Login/Index';
+        }
+
+        //讓帳密不能輸入特殊字元
+        const inputAccount = document.getElementById("indexAccount");
+        const inputPassword = document.getElementById("indexPassword");
+
+        inputAccount.addEventListener("input", function (event) {
+            const allowedCharacters = /^[a-zA-Z0-9]*$/;
+
+            if (!allowedCharacters.test(event.target.value)) {
+                event.target.value = event.target.value.replace(/[^a-zA-Z0-9]/g, "");
+            }
+        });
+        inputPassword.addEventListener("input", function (event) {
+            const allowedCharacters = /^[a-zA-Z0-9]*$/;
+
+            if (!allowedCharacters.test(event.target.value)) {
+                event.target.value = event.target.value.replace(/[^a-zA-Z0-9]/g, "");
+            }
+        });
+
+        
+        function submit(){
+            var account = $('#indexAccount').val();
+            var password = $('#indexPassword').val();
+            var name = $('#indexName').val();
+            var phone = $('#indexPhone').val();
+            var email = $('#indexEmail').val();
+            var birthday = $('#indexBirthday').val();
+            var hasError = false;
+
+            $(".accountErrorMessage").text("");
+            $(".passwordErrorMessage").text("");
+            $(".nameErrorMessage").text("");
+            $(".phoneErrorMessage").text("");
+            $(".emailErrorMessage").text("");
+            $(".birthdayErrorMessage").text("");
+
+            if (account === '') {
+                $(".accountErrorMessage").text("請填寫帳號");      
+                hasError = true;
+            } 
+            if (password === '') {
+                $(".passwordErrorMessage").text("請填寫密碼");
+                hasError = true;
+            }
+            if (name === '') {
+                $(".nameErrorMessage").text("請填寫姓名");
+                hasError = true;
+            }
+            if (phone === '') {
+                $(".phoneErrorMessage").text("請填寫手機號碼");
+                hasError = true;
+            }
+            if (email === '') {
+                $(".emailErrorMessage").text("請填寫email");
+                hasError = true;
+            }
+            if (birthday === '') {
+                $(".birthdayErrorMessage").text("請填寫生日");
+                hasError = true;
+            }
+
+            if (hasError) {
+                return false; 
+            }
+
+            confirm();
+        }
+
+        function confirm() {
+            var account = $('#indexAccount').val();
+            var password = $('#indexPassword').val();
+            var name = $('#indexName').val();
+            var phone = $('#indexPhone').val();
+            var email = $('#indexEmail').val();
+            var birthday = $('#indexBirthday').val();
+            var postData = {
+                account: account,
+                password: password,
+                name: name,
+                phone: phone,
+                email: email,
+                birthday: birthday
+            };
+            console.log('post');
+            $.ajax({
+                url: '/Login/Register',
+                type: 'POST',
+                dataType: 'json',
+                contentType: "application/json",
+                data: JSON.stringify(postData),
+                success: function (response) {
+                    if (response.IsSuccess) {
+                        alert(response.Message);
+                        window.location.href = '/Login/Index';
+                    } else {
+                        alert(response.Message);
+                    }
+                }
+            });
+        }
+
+        
+    </script>
+</body>
+

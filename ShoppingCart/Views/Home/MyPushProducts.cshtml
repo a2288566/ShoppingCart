@@ -1,0 +1,91 @@
+﻿
+@{
+    ViewBag.Title = "我的刊登商品";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+
+<html>
+<head>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+    <br>
+    <br>
+    <br>
+
+    <table id="myProductDataTable" class="display">
+        <thead>
+            <tr>
+                <th>商品標題</th>
+                <th>單價</th>
+                <th>瀏覽量</th>
+                <th>編輯</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="clickable-row" data-href="@Url.Action("ProductDetail", "Home", new { productId = item.Id })">
+                    <td>@item.ProductTitle</td>
+                    <td>@item.Price</td>
+                    <td>@item.ViewCount</td>
+                    <td>
+                        <a href="#" class="editMyProduct" data-productid="@item.Id">編輯</a>
+                        <a href="#" class="deleteMyProduct" data-productid="@item.Id">刪除</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <script>
+
+        $(document).ready(function () {
+            $('#myProductDataTable').DataTable();
+            $(".clickable-row").click(function () {
+                window.location.href = $(this).data("href");
+            });
+        });
+
+        $(".deleteMyProduct").click(function () {
+            var productId = $(this).data("productid");
+            confirm('使否要刪除此商品')
+            $.ajax({
+                url: '/Home/DeleteMyProduct',
+                type: 'POST',
+                dataType: 'json',
+                contentType: "application/json",
+                data: JSON.stringify({ productId: productId }),
+                success: function (response) {
+                    if (response.IsSuccess) {
+                        alert('商品刪除成功');
+                        window.location.href = '/Home/MyPushProducts';
+                    } else {
+                        alert("刪除失敗");
+                    }
+                }
+            });
+        });
+
+        $(".editMyProduct").click(function () {
+            var productId = $(this).data("productid");
+            $.ajax({
+                url: '/Home/GetEditProduct',
+                type: 'POST',
+                dataType: 'json',
+                contentType: "application/json",
+                data: JSON.stringify({ productId: productId }),
+                success: function (response) {
+                    if (response.IsSuccess) {
+                        window.location.href = '/Home/Edit';
+                    } else {
+                        alert(response.Message);
+                    }
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
+
